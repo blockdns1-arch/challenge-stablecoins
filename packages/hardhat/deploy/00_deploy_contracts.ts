@@ -147,6 +147,35 @@ export default deployScript(
           account: deployer,
         });
       }
+    } else {
+      // Live network setup: seed a small DEX pool so swaps and pricing work on testnet.
+      // pool ratio makes DEX.currentPrice() = defaultPrice (i.e. ~$ethPrice per 1 ETH).
+      const ethCollateralAmount = parseEther("0.1");
+      const ethDEXAmount = parseEther("0.05");
+      const myUSDAmount = (ethPrice * ethDEXAmount) / parseEther("1");
+
+      await env.execute(engine, {
+        functionName: "addCollateral",
+        args: [],
+        value: ethCollateralAmount,
+        account: deployer,
+      });
+      await env.execute(engine, {
+        functionName: "mintMyUSD",
+        args: [myUSDAmount],
+        account: deployer,
+      });
+      await env.execute(stablecoin, {
+        functionName: "approve",
+        args: [DEX.address, myUSDAmount],
+        account: deployer,
+      });
+      await env.execute(DEX, {
+        functionName: "init",
+        args: [myUSDAmount],
+        value: ethDEXAmount,
+        account: deployer,
+      });
     }
   },
   { tags: ["MyUSDEngine"] },

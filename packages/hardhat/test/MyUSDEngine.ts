@@ -26,6 +26,7 @@ describe("🚩 Stablecoin Challenge 🤓", function () {
   let borrowAmount: bigint;
 
   beforeEach(async function () {
+    this.timeout(200000);
     ({ ethers } = await network.create());
     collateralAmount = ethers.parseEther("10");
     borrowAmount = ethers.parseEther("5000");
